@@ -5,6 +5,43 @@
       <p>{{ t('orders.description') }}</p>
     </div>
 
+    <!-- Above the 250-row sales table so new orders are visible without scrolling; outside the v-if chain so a restock-order failure never hides the main table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ restockOrders.length }})</h3>
+      </div>
+      <div v-if="restockError" class="error">{{ restockError }}</div>
+      <div v-else-if="!restockOrders.length" class="empty-state">{{ t('orders.noSubmittedOrders') }}</div>
+      <div v-else class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('orders.table.orderNumber') }}</th>
+              <th>{{ t('orders.table.items') }}</th>
+              <th>{{ t('orders.table.totalValue') }}</th>
+              <th>{{ t('orders.table.orderDate') }}</th>
+              <th>{{ t('orders.table.expectedDelivery') }}</th>
+              <th>{{ t('orders.leadTime') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in restockOrders" :key="order.id">
+              <td><strong>{{ order.order_number }}</strong></td>
+              <td>
+                <div v-for="item in order.items" :key="item.sku">
+                  {{ translateProductName(item.name) }} x {{ item.quantity }}
+                </div>
+              </td>
+              <td><strong>{{ formatCurrency(order.total_cost, currentCurrency) }}</strong></td>
+              <td>{{ formatDate(order.order_date) }}</td>
+              <td>{{ formatDate(order.expected_delivery) }}</td>
+              <td>{{ t('orders.leadTimeDays', { count: order.lead_time_days }) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
@@ -83,6 +120,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrency } from '../utils/currency'
 
 export default {
   name: 'Orders',
@@ -153,10 +191,28 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    const restockOrders = ref([])
+    const restockError = ref(null)
+    const loadRestockOrders = async () => {
+      try {
+        restockOrders.value = await api.getRestockOrders()
+      } catch (err) {
+        restockError.value = t('orders.submittedError')
+        console.error('Restock orders error:', err)
+      }
+    }
+
+    onMounted(() => {
+      loadOrders()
+      loadRestockOrders()
+    })
 
     return {
       t,
+      restockOrders,
+      restockError,
+      formatCurrency,
+      currentCurrency,
       loading,
       error,
       orders,
@@ -245,7 +301,7 @@ export default {
   left: 0;
   margin-top: 0.5rem;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 0.75rem;
@@ -259,7 +315,7 @@ export default {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--card-bg);
 }
 
 .item-entry:last-child {
@@ -269,11 +325,17 @@ export default {
 .item-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .item-meta {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-sub);
+}
+
+.empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-sub);
 }
 </style>

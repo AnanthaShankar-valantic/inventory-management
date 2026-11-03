@@ -273,17 +273,18 @@ const chartData = computed(() => {
 </style>
 ```
 
-**Use CSS variables for themes:**
+**Use CSS variables for themes (valantic CI tokens, defined in `App.vue` `:root`):**
 ```css
-:root {
-  --primary-color: #3b82f6;
-  --danger-color: #ef4444;
+.card {
+  background: #fff;
+  color: var(--text);              /* #100c2a */
+  border: 1px solid var(--border); /* #f0eeee */
 }
-
-.button {
-  background: var(--primary-color);
-}
+.card-sub { color: var(--text-sub); } /* #193773 */
+.accent   { background: var(--val-gradient); } /* coral, 135deg */
 ```
+- Font: Maven Pro. Icons: Phosphor (`<i class="ph ph-package">`). Layout: left sidebar, collapsible.
+- Keep status colours (green/blue/yellow/red) for badges and charts.
 
 **Responsive design:**
 - Use rem/em units for scalability

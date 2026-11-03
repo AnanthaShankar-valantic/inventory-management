@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,6 +114,11 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    noSubmittedOrders: 'No restock orders submitted yet',
+    submittedError: 'Failed to load submitted orders',
+    leadTime: 'Lead Time',
+    leadTimeDays: '{count} days',
     table: {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
@@ -126,6 +133,28 @@ export default {
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Get restock recommendations for a budget and place an order',
+    budget: 'Budget',
+    totalCost: 'Total Cost',
+    remainingBudget: 'Remaining Budget',
+    recommendedItems: 'Recommended Items',
+    noItems: 'No items fit within this budget',
+    placeOrder: 'Place Order',
+    placing: 'Placing order...',
+    orderFailed: 'Failed to place order',
+    orderPlaced: 'Order {orderNumber} placed. Lead time: {days} days. Expected delivery: {date}.',
+    table: {
+      sku: 'SKU',
+      name: 'Name',
+      quantity: 'Quantity',
+      unitCost: 'Unit Cost',
+      lineCost: 'Line Cost'
     }
   },
 
@@ -302,6 +331,24 @@ export default {
     dueDate: 'Due Date',
     addTask: 'Add Task',
     noTasks: 'No tasks yet. Add your first task above!'
+  },
+
+  // Purchase Order Modal
+  purchaseOrder: {
+    createTitle: 'Create Purchase Order',
+    viewTitle: 'Purchase Order',
+    sku: 'SKU',
+    orderId: 'Order ID',
+    supplier: 'Supplier Name',
+    quantity: 'Quantity',
+    unitCost: 'Unit Cost (USD)',
+    totalCost: 'Total Cost',
+    expectedDelivery: 'Expected Delivery Date',
+    notes: 'Notes (optional)',
+    submit: 'Create PO',
+    submitting: 'Creating...',
+    createError: 'Could not create the purchase order. Please try again.',
+    loadError: 'Could not load the purchase order.'
   },
 
   // Language
