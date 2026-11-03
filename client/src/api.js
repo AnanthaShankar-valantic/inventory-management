@@ -117,5 +117,13 @@ export const api = {
   async getPurchaseOrderByBacklogItem(backlogItemId) {
     const response = await axios.get(`${API_BASE_URL}/purchase-orders/${backlogItemId}`)
     return response.data
-  }
+  },
+
+  // Client-side filter: the backend has no low-stock endpoint. Messy formatting is deliberate (prettier test).
+      async   getLowStockItems( threshold=10 ,filters={} ){
+  const   items=await this.getInventory( filters )
+        return items.filter( item=>{
+     return   item.quantity_on_hand<threshold
+      } )
+    }
 }

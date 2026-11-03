@@ -177,6 +177,7 @@ import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
 import { formatCurrency as formatCurrencyUtil } from '../utils/currency'
+import { monthOf } from '../utils/date'
 import CostDetailModal from '../components/CostDetailModal.vue'
 
 export default {
@@ -232,8 +233,7 @@ export default {
       }
       // Filter transactions by selected month
       return allTransactions.value.filter(t => {
-        const transactionMonth = new Date(t.date).toISOString().slice(0, 7)
-        return transactionMonth === selectedPeriod.value
+        return monthOf(t.date) === selectedPeriod.value
       })
     })
 
@@ -270,8 +270,7 @@ export default {
 
       // Filter orders by selected month
       return allOrders.value.filter(order => {
-        const orderMonth = new Date(order.order_date).toISOString().slice(0, 7)
-        return orderMonth === selectedPeriod.value
+        return monthOf(order.order_date) === selectedPeriod.value
       })
     })
 
@@ -284,8 +283,7 @@ export default {
       return {
         totalRevenue,
         orderCount,
-        avgOrderValue,
-        revenueGrowth: 15.3 // Placeholder - could calculate from historical data
+        avgOrderValue
       }
     })
 
@@ -321,10 +319,9 @@ export default {
 
       // Calculate revenue from orders
       allOrders.value.forEach(order => {
-        const orderDate = new Date(order.order_date)
-        const monthIndex = orderDate.getMonth()
-        if (monthIndex >= 0 && monthIndex < 12) {
-          revenueByMonth[monthIndex].revenue += order.total_value || 0
+        const month = monthOf(order.order_date)
+        if (month) {
+          revenueByMonth[Number(month.slice(5)) - 1].revenue += order.total_value || 0
         }
       })
 
@@ -395,6 +392,7 @@ export default {
 
     const formatDate = (dateString) => {
       return new Date(dateString).toLocaleDateString('en-US', {
+        timeZone: 'UTC', // date-only strings are UTC midnight; local time would show the day before west of UTC
         month: 'short',
         day: 'numeric'
       })
@@ -402,9 +400,9 @@ export default {
 
     const formatDateShort = (dateString) => {
       const date = new Date(dateString)
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const day = date.getDate().toString().padStart(2, '0')
-      const year = date.getFullYear().toString().slice(-2)
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0')
+      const day = date.getUTCDate().toString().padStart(2, '0')
+      const year = date.getUTCFullYear().toString().slice(-2)
       return `${month}/${day}/${year}`
     }
 

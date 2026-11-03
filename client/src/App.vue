@@ -71,7 +71,7 @@
 <script>
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { api } from './api'
-import { useAuth } from './composables/useAuth'
+import { useAuth, mockTasks } from './composables/useAuth'
 import { useI18n } from './composables/useI18n'
 import FilterBar from './components/FilterBar.vue'
 import ProfileMenu from './components/ProfileMenu.vue'
@@ -140,14 +140,10 @@ export default {
     const deleteTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const isMockTask = currentUser.value.tasks.some(t => t.id === taskId)
+        const mockIndex = mockTasks.value.findIndex(t => t.id === taskId)
 
-        if (isMockTask) {
-          // Remove from mock tasks
-          const index = currentUser.value.tasks.findIndex(t => t.id === taskId)
-          if (index !== -1) {
-            currentUser.value.tasks.splice(index, 1)
-          }
+        if (mockIndex !== -1) {
+          mockTasks.value.splice(mockIndex, 1)
         } else {
           // Remove from API tasks
           await api.deleteTask(taskId)
@@ -161,7 +157,7 @@ export default {
     const toggleTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const mockTask = currentUser.value.tasks.find(t => t.id === taskId)
+        const mockTask = mockTasks.value.find(t => t.id === taskId)
 
         if (mockTask) {
           // Toggle mock task status
