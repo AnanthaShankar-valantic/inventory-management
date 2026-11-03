@@ -302,6 +302,7 @@ import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
 import { formatCurrency } from '../utils/currency'
+import { monthOf } from '../utils/date'
 import ProductDetailModal from '../components/ProductDetailModal.vue'
 import BacklogDetailModal from '../components/BacklogDetailModal.vue'
 import PurchaseOrderModal from '../components/PurchaseOrderModal.vue'
@@ -466,11 +467,9 @@ export default {
       if (Array.isArray(allOrders.value)) {
         allOrders.value.forEach(order => {
           if (order && order.order_date) {
-            const date = new Date(order.order_date)
-            const monthIndex = date.getMonth()
-            // Check if monthIndex is valid (0-11)
-            if (!isNaN(monthIndex) && monthIndex >= 0 && monthIndex <= 11) {
-              const monthName = monthNames[monthIndex]
+            const month = monthOf(order.order_date)
+            if (month) {
+              const monthName = monthNames[Number(month.slice(5)) - 1]
               monthMap[monthName].orders++
             }
           }

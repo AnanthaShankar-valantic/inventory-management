@@ -171,13 +171,16 @@ export default {
     }
 
     const getChangePercent = (forecast) => {
+      // A zero baseline has no meaningful percentage; show 0.0 instead of Infinity/NaN
+      if (!forecast.current_demand) return '0.0'
       const change = ((forecast.forecasted_demand - forecast.current_demand) / forecast.current_demand * 100).toFixed(1)
       return change > 0 ? `+${change}` : change
     }
 
     const getChangeColor = (forecast) => {
       const change = forecast.forecasted_demand - forecast.current_demand
-      const changePercent = Math.abs((change / forecast.current_demand) * 100)
+      // Zero baseline: treat any change as large so the colour follows the sign below
+      const changePercent = forecast.current_demand ? Math.abs((change / forecast.current_demand) * 100) : Infinity
 
       // If change is within ±2%, consider it stable and show blue
       if (changePercent <= 2) {

@@ -1,3 +1,4 @@
+import re
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
@@ -7,29 +8,21 @@ from mock_data import inventory_items, orders, demand_forecasts, backlog_items, 
 
 app = FastAPI(title="Factory Inventory Management System")
 
-# Quarter mapping for date filtering
-QUARTER_MAP = {
-    'Q1-2025': ['2025-01', '2025-02', '2025-03'],
-    'Q2-2025': ['2025-04', '2025-05', '2025-06'],
-    'Q3-2025': ['2025-07', '2025-08', '2025-09'],
-    'Q4-2025': ['2025-10', '2025-11', '2025-12']
-}
+def quarter_of(order_date: Optional[str]) -> Optional[str]:
+    """'2025-05-14' -> 'Q2-2025'; None when the date does not start with YYYY-MM."""
+    m = re.match(r'(\d{4})-(0[1-9]|1[0-2])', order_date or '')
+    return f"Q{(int(m[2]) - 1) // 3 + 1}-{m[1]}" if m else None
 
 def filter_by_month(items: list, month: Optional[str]) -> list:
-    """Filter items by month/quarter based on order_date field"""
+    """Filter items by month (YYYY-MM) or quarter (Qn-YYYY) on order_date; reject anything else."""
     if not month or month == 'all':
         return items
-
-    if month.startswith('Q'):
-        # Handle quarters
-        if month in QUARTER_MAP:
-            months = QUARTER_MAP[month]
-            return [item for item in items if any(m in item.get('order_date', '') for m in months)]
-    else:
-        # Direct month match
-        return [item for item in items if month in item.get('order_date', '')]
-
-    return items
+    if re.fullmatch(r'Q[1-4]-\d{4}', month):
+        return [item for item in items if quarter_of(item.get('order_date')) == month]
+    if re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', month):
+        # startswith, not `in`: a substring match lets junk like "-0" hit most orders
+        return [item for item in items if (item.get('order_date') or '').startswith(month)]
+    raise HTTPException(status_code=400, detail=f"Invalid month filter: {month}")
 
 def apply_filters(items: list, warehouse: Optional[str] = None, category: Optional[str] = None,
                  status: Optional[str] = None) -> list:
@@ -51,7 +44,7 @@ def apply_filters(items: list, warehouse: Optional[str] = None, category: Option
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,  # the app sends no cookies; "*" combined with credentials is rejected by browsers and unsafe
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -432,17 +425,8 @@ def get_quarterly_reports():
     quarters = {}
 
     for order in orders:
-        order_date = order.get('order_date', '')
-        # Determine quarter
-        if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
-            quarter = 'Q1-2025'
-        elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
-            quarter = 'Q2-2025'
-        elif '2025-07' in order_date or '2025-08' in order_date or '2025-09' in order_date:
-            quarter = 'Q3-2025'
-        elif '2025-10' in order_date or '2025-11' in order_date or '2025-12' in order_date:
-            quarter = 'Q4-2025'
-        else:
+        quarter = quarter_of(order.get('order_date'))
+        if quarter is None:
             continue
 
         if quarter not in quarters:
@@ -451,7 +435,8 @@ def get_quarterly_reports():
                 'total_orders': 0,
                 'total_revenue': 0,
                 'delivered_orders': 0,
-                'avg_order_value': 0
+                'avg_order_value': 0,
+                'fulfillment_rate': 0
             }
 
         quarters[quarter]['total_orders'] += 1
@@ -468,7 +453,7 @@ def get_quarterly_reports():
         result.append(data)
 
     # Sort by quarter
-    result.sort(key=lambda x: x['quarter'])
+    result.sort(key=lambda x: (x['quarter'][3:], x['quarter']))  # year, then quarter
     return result
 
 @app.get("/api/reports/monthly-trends")

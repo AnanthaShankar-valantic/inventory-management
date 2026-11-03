@@ -10,6 +10,19 @@ const baseUserData = {
   joinDate: '2022-03-15'
 }
 
+// Mock tasks live in one ref, not inside the locale computed. A computed rebuilds its objects on every
+// language switch, which silently discarded deletes and status toggles made on them.
+export const mockTasks = ref([
+  { id: 1, priority: 'high', dueDate: '2025-10-08', status: 'pending',
+    title: { en: 'Review Q4 inventory levels', ja: '第4四半期の在庫レベルを確認' } },
+  { id: 2, priority: 'medium', dueDate: '2025-10-06', status: 'pending',
+    title: { en: 'Approve Tokyo warehouse orders', ja: '東京倉庫の注文を承認' } },
+  { id: 3, priority: 'medium', dueDate: '2025-10-10', status: 'pending',
+    title: { en: 'Update reorder points for Circuit Boards', ja: '回路基板の再注文点を更新' } },
+  { id: 4, priority: 'low', dueDate: '2025-10-15', status: 'pending',
+    title: { en: 'Review monthly spending report', ja: '月次支出レポートを確認' } }
+])
+
 // Mock current user data with language-aware fields
 const createCurrentUser = () => {
   const { currentLocale } = useI18n()
@@ -23,65 +36,13 @@ const createCurrentUser = () => {
       jobTitle: isJapanese ? 'オペレーションマネージャー' : 'Operations Manager',
       department: isJapanese ? 'サプライチェーン運営部' : 'Supply Chain Operations',
       location: isJapanese ? 'サンフランシスコ' : 'San Francisco',
-      tasks: isJapanese ? [
-        {
-          id: 1,
-          title: '第4四半期の在庫レベルを確認',
-          priority: 'high',
-          dueDate: '2025-10-08',
-          status: 'pending'
-        },
-        {
-          id: 2,
-          title: '東京倉庫の注文を承認',
-          priority: 'medium',
-          dueDate: '2025-10-06',
-          status: 'pending'
-        },
-        {
-          id: 3,
-          title: '回路基板の再注文点を更新',
-          priority: 'medium',
-          dueDate: '2025-10-10',
-          status: 'pending'
-        },
-        {
-          id: 4,
-          title: '月次支出レポートを確認',
-          priority: 'low',
-          dueDate: '2025-10-15',
-          status: 'pending'
-        }
-      ] : [
-        {
-          id: 1,
-          title: 'Review Q4 inventory levels',
-          priority: 'high',
-          dueDate: '2025-10-08',
-          status: 'pending'
-        },
-        {
-          id: 2,
-          title: 'Approve Tokyo warehouse orders',
-          priority: 'medium',
-          dueDate: '2025-10-06',
-          status: 'pending'
-        },
-        {
-          id: 3,
-          title: 'Update reorder points for Circuit Boards',
-          priority: 'medium',
-          dueDate: '2025-10-10',
-          status: 'pending'
-        },
-        {
-          id: 4,
-          title: 'Review monthly spending report',
-          priority: 'low',
-          dueDate: '2025-10-15',
-          status: 'pending'
-        }
-      ]
+      tasks: mockTasks.value.map(t => ({
+        id: t.id,
+        title: isJapanese ? t.title.ja : t.title.en,
+        priority: t.priority,
+        dueDate: t.dueDate,
+        status: t.status
+      }))
     }
   })
 }

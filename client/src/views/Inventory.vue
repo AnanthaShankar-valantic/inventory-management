@@ -32,6 +32,10 @@
               </svg>
             </button>
           </div>
+          <button type="button" class="export-btn" :disabled="!filteredItems.length" @click="exportCsv">
+            <i class="ph ph-download-simple"></i>
+            {{ t('common.export') }}
+          </button>
         </div>
         <div class="table-container">
           <table>
@@ -201,9 +205,36 @@ export default {
       showItemModal.value = true
     }
 
+    // Exports exactly the rows on screen (search + filters), with raw numbers so Excel can sum them.
+    const csvCell = (v) => {
+      let s = String(v ?? '')
+      // Guard against spreadsheet formula injection from text cells
+      if (typeof v === 'string' && /^[=+\-@]/.test(s)) s = "'" + s
+      return `"${s.replace(/"/g, '""')}"`
+    }
+
+    const exportCsv = () => {
+      const header = ['sku', 'itemName', 'category', 'quantityOnHand', 'reorderPoint', 'unitCost', 'totalValue', 'location', 'status']
+        .map(k => t(`inventory.table.${k}`))
+      const rows = filteredItems.value.map(i => [
+        i.sku, translateProductName(i.name), translateCategory(i.category),
+        i.quantity_on_hand, i.reorder_point, i.unit_cost.toFixed(2),
+        (i.quantity_on_hand * i.unit_cost).toFixed(2), translateWarehouse(i.location), getStockStatus(i)
+      ])
+      const csv = [header, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n')
+      // BOM so Excel reads UTF-8 (Japanese labels)
+      const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `inventory-${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+
     onMounted(loadInventory)
 
     return {
+      exportCsv,
       t,
       loading,
       error,
@@ -315,6 +346,26 @@ export default {
 .clear-search svg {
   width: 18px;
   height: 18px;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--val-gradient);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .loading,
