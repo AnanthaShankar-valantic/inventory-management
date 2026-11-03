@@ -1,42 +1,56 @@
 <template>
-  <div class="app">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="logo">
-          <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
+  <div class="app shell">
+    <aside class="sidebar" :class="{ collapsed }">
+      <div class="sidebar-top">
+        <!-- Official Anthropic wordmark, inline SVG copied from anthropic.com -->
+        <div class="logo" :title="t('nav.companyName')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 570 64" fill="none" style="height:16px;width:auto;" aria-label="Anthropic" role="img">
+            <path d="M139.492 12.9945H160.265V62.9392H173.525V12.9945H194.298V1.06077H139.492V12.9945Z" fill="currentColor"/>
+            <path d="M116.066 44.3757L88.221 1.06077H73.1934V62.9392H86.011V19.6243L113.856 62.9392H128.884V1.06077H116.066V44.3757Z" fill="currentColor"/>
+            <path d="M247.337 25.7238H218.166V1.06077H204.906V62.9392H218.166V37.6575H247.337V62.9392H260.597V1.06077H247.337V25.7238Z" fill="currentColor"/>
+            <path d="M24.663 1.06077L0 62.9392H13.7901L18.834 49.9447H44.6365L49.6796 62.9392H63.4696L38.8066 1.06077H24.663ZM23.2946 38.453L31.7348 16.7072L40.175 38.453H23.2946Z" fill="currentColor"/>
+            <path d="M370.475 0C352.619 0 339.978 13.2597 339.978 32.0884C339.978 50.7403 352.619 64 370.475 64C388.243 64 400.796 50.7403 400.796 32.0884C400.796 13.2597 388.243 0 370.475 0ZM370.475 51.6243C360.044 51.6243 353.68 44.1989 353.68 32.0884C353.68 19.8011 360.044 12.3757 370.475 12.3757C380.818 12.3757 387.094 19.8011 387.094 32.0884C387.094 44.1989 380.818 51.6243 370.475 51.6243Z" fill="currentColor"/>
+            <path d="M555.845 42.1657C553.547 48.1768 548.95 51.6243 542.674 51.6243C532.243 51.6243 525.878 44.1989 525.878 32.0884C525.878 19.8011 532.243 12.3757 542.674 12.3757C548.95 12.3757 553.547 15.8232 555.845 21.8343H569.901C566.453 8.57459 556.11 0 542.674 0C524.818 0 512.177 13.2597 512.177 32.0884C512.177 50.7403 524.818 64 542.674 64C556.199 64 566.541 55.337 569.989 42.1657H555.845Z" fill="currentColor"/>
+            <path d="M471.337 1.06077L496 62.9392H509.525L484.862 1.06077H471.337Z" fill="currentColor"/>
+            <path d="M443.403 1.06077H413.171V62.9392H426.431V40.4862H443.403C457.459 40.4862 466.033 33.0608 466.033 20.7735C466.033 8.48619 457.459 1.06077 443.403 1.06077ZM442.784 28.5525H426.431V12.9945H442.784C449.326 12.9945 452.773 15.6464 452.773 20.7735C452.773 25.9006 449.326 28.5525 442.784 28.5525Z" fill="currentColor"/>
+            <path d="M329.812 19.8895C329.812 8.22099 321.238 1.06077 307.182 1.06077H276.95V62.9392H290.21V38.7182H304.971L318.232 62.9392H332.906L318.223 36.8734C325.593 34.0402 329.812 28.0743 329.812 19.8895ZM290.21 12.9945H306.564C313.105 12.9945 316.552 15.3812 316.552 19.8895C316.552 24.3978 313.105 26.7845 306.564 26.7845H290.21V12.9945Z" fill="currentColor"/>
+          </svg>
         </div>
-        <nav class="nav-tabs">
-          <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
-          </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
-          </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
-          </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
-          </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
-          </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
-          </router-link>
-        </nav>
+        <button
+          class="collapse-toggle"
+          type="button"
+          :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+          @click="collapsed = !collapsed"
+        >
+          <i class="ph" :class="collapsed ? 'ph-caret-double-right' : 'ph-caret-double-left'"></i>
+        </button>
+      </div>
+      <nav class="nav-links">
+        <router-link
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          :title="t(item.label)"
+          :class="{ active: $route.path === item.to }"
+        >
+          <i class="ph" :class="item.icon"></i>
+          <span class="nav-label">{{ t(item.label) }}</span>
+        </router-link>
+      </nav>
+      <div class="sidebar-footer">
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
         />
       </div>
-    </header>
-    <FilterBar />
-    <main class="main-content">
-      <router-view />
-    </main>
+    </aside>
+    <div class="content-column">
+      <FilterBar />
+      <main class="main-content">
+        <router-view />
+      </main>
+    </div>
 
     <ProfileDetailsModal
       :is-open="showProfileDetails"
@@ -55,7 +69,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { api } from './api'
 import { useAuth } from './composables/useAuth'
 import { useI18n } from './composables/useI18n'
@@ -80,6 +94,25 @@ export default {
     const showProfileDetails = ref(false)
     const showTasks = ref(false)
     const apiTasks = ref([])
+
+    const navItems = [
+      { to: '/', label: 'nav.overview', icon: 'ph-chart-line-up' },
+      { to: '/inventory', label: 'nav.inventory', icon: 'ph-package' },
+      { to: '/orders', label: 'nav.orders', icon: 'ph-shopping-cart' },
+      { to: '/spending', label: 'nav.finance', icon: 'ph-currency-circle-dollar' },
+      { to: '/demand', label: 'nav.demandForecast', icon: 'ph-trend-up' },
+      { to: '/restocking', label: 'nav.restocking', icon: 'ph-arrow-counter-clockwise' },
+      { to: '/reports', label: 'nav.reports', icon: 'ph-chart-bar' }
+    ]
+
+    // Sidebar collapse: saved choice wins; below 1024px it collapses automatically
+    const narrow = window.matchMedia('(max-width: 1023px)')
+    const stored = localStorage.getItem('sidebarCollapsed')
+    const collapsed = ref(narrow.matches || stored === 'true')
+    watch(collapsed, v => localStorage.setItem('sidebarCollapsed', String(v)))
+    const onNarrow = e => { if (e.matches) collapsed.value = true }
+    narrow.addEventListener('change', onNarrow)
+    onBeforeUnmount(() => narrow.removeEventListener('change', onNarrow))
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
@@ -150,6 +183,8 @@ export default {
 
     return {
       t,
+      navItems,
+      collapsed,
       showProfileDetails,
       showTasks,
       tasks,
@@ -162,6 +197,42 @@ export default {
 </script>
 
 <style>
+:root {
+  /* Gradient */
+  --val-coral:    #ff4b4b;
+  --val-peach:    #ff744f;
+  --val-gradient: linear-gradient(135deg, #ff4b4b, #ff744f);
+
+  /* Base */
+  --val-black:    #100c2a;
+  --val-white:    #ffffff;
+
+  /* Secondary */
+  --val-indigo:   #193773;
+  --val-blue:     #3c4bc8;
+  --val-purple:   #5b26b7;
+
+  /* Tertiary */
+  --val-gold:     #c0aa81;
+  --val-silver:   #cdcdcd;
+  --val-lavender: #a78db6;
+
+  /* Theme-aware tokens */
+  --bg:           var(--val-white);
+  --text:         var(--val-black);
+  --text-sub:     var(--val-indigo);
+  --border:       #f0eeee;
+  --card-bg:      #fafafa;
+
+  /* Spacing scale (8px grid) */
+  --sp-1:  8px;   --sp-2: 16px;  --sp-3: 24px;  --sp-4: 32px;
+  --sp-6: 48px;   --sp-8: 64px;  --sp-10: 80px;
+
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 72px;
+  --shadow-card: 0 1px 3px rgba(16, 12, 42, 0.06);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -169,162 +240,248 @@ export default {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  font-family: 'Maven Pro', sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  background: var(--card-bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 .app {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
 }
 
-.top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+.shell {
+  display: flex;
 }
 
-.nav-container {
-  max-width: 1600px;
-  margin: 0 auto;
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-2);
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+.sidebar-top {
   display: flex;
   align-items: center;
-  padding: 0 2rem;
-  height: 70px;
-}
-
-.nav-container > .nav-tabs {
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.nav-container > .language-switcher {
-  margin-right: 1rem;
+  justify-content: space-between;
+  gap: var(--sp-1);
+  min-height: 40px;
+  padding: 0 var(--sp-1);
 }
 
 .logo {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  align-items: center;
+  overflow: hidden;
+  min-width: 0;
+  color: var(--text);
 }
 
-.logo h1 {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+/* Collapsed: clip to the leading "A" glyph of the wordmark */
+.sidebar.collapsed .sidebar-top {
+  flex-direction: column;
+  padding: 0;
 }
 
-.subtitle {
-  font-size: 0.813rem;
-  color: #64748b;
-  font-weight: 400;
-  padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+.logo svg {
+  flex-shrink: 0;
 }
 
-.nav-tabs {
+.sidebar.collapsed .logo {
+  width: 28px;
+}
+
+.collapse-toggle {
   display: flex;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.nav-tabs a {
-  padding: 0.625rem 1.25rem;
-  color: #64748b;
+.collapse-toggle:hover {
+  background: var(--card-bg);
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--text-sub);
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.938rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  font-size: 16px;
+  border-radius: 8px;
   position: relative;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+.nav-links a .ph {
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
-.nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
+.nav-links a:hover {
+  color: var(--text);
+  background: var(--card-bg);
 }
 
-.nav-tabs a.active::after {
+.nav-links a.active {
+  color: var(--text);
+  font-weight: 600;
+  background: rgba(255, 75, 75, 0.08);
+}
+
+.nav-links a.active::before {
   content: '';
   position: absolute;
-  bottom: -1px;
   left: 0;
-  right: 0;
-  height: 2px;
-  background: #2563eb;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--val-gradient);
+}
+
+.nav-links a.active .ph {
+  color: var(--val-coral);
+}
+
+.sidebar.collapsed .nav-links a {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar.collapsed .nav-label {
+  display: none;
+}
+
+/* Collapsed footer: icon-only buttons; menus open to the right so they are not clipped */
+.sidebar.collapsed .profile-button,
+.sidebar.collapsed .language-button {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar.collapsed .language-label,
+.sidebar.collapsed .profile-name,
+.sidebar.collapsed .chevron {
+  display: none;
+}
+
+.sidebar.collapsed .dropdown-menu {
+  bottom: 0;
+  left: calc(100% + 8px);
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.content-column {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--sidebar-w);
+}
+
+.sidebar.collapsed ~ .content-column {
+  margin-left: var(--sidebar-w-collapsed);
 }
 
 .main-content {
-  flex: 1;
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
-  padding: 1.5rem 2rem;
+  max-width: 100%;
+  padding: var(--sp-3) var(--sp-4);
 }
 
 .page-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--sp-3);
 }
 
 .page-header h2 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.375rem;
-  letter-spacing: -0.025em;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
 }
 
 .page-header p {
-  color: #64748b;
-  font-size: 0.938rem;
+  color: var(--text-sub);
+  font-size: 16px;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
 }
 
 .stat-card {
-  background: white;
-  padding: 1.25rem;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  background: var(--val-white);
+  padding: var(--sp-3);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(16, 12, 42, 0.08);
 }
 
 .stat-label {
-  color: #64748b;
-  font-size: 0.875rem;
+  color: var(--text-sub);
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.625rem;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--sp-1);
 }
 
 .stat-value {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text);
 }
 
 .stat-card.warning .stat-value {
@@ -344,27 +501,27 @@ body {
 }
 
 .card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.25rem;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 1.25rem;
+  background: var(--val-white);
+  border-radius: 12px;
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--sp-3);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--border);
 }
 
 .card-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .table-container {
@@ -377,26 +534,26 @@ table {
 }
 
 thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 th {
   text-align: left;
-  padding: 0.5rem 0.75rem;
+  padding: var(--sp-1) 12px;
   font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
+  color: var(--text-sub);
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 td {
-  padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
-  font-size: 0.875rem;
+  padding: var(--sp-1) 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
 }
 
 tbody tr {
@@ -404,7 +561,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--card-bg);
 }
 
 .badge {
@@ -470,7 +627,7 @@ tbody tr:hover {
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-sub);
   font-size: 0.938rem;
 }
 

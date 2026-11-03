@@ -69,8 +69,13 @@ npm install && npm run dev
 - Data: `server/data/*.json`
 - Styles: `client/src/App.vue`
 
+## Code Comments
+Always document non-obvious logic changes with comments (explain the why, not the what).
+
 ## Design System
-- Colors: Slate/gray (#0f172a, #64748b, #e2e8f0)
+- Theme (valantic CI tokens in `App.vue` `:root`): Maven Pro font, text #100c2a (`--text`), secondary #193773 (`--text-sub`), border #f0eeee, coral gradient accent (#ff4b4b to #ff744f, 135deg), Phosphor icons, no extra neutral hex (use tokens)
+- Layout: left vertical sidebar (collapsible, 240px/72px) with inline Anthropic logo; cards white, 1px border, 12px radius
+- Spacing: 4/8px scale (`--sp-*`)
 - Status: green/blue/yellow/red
 - Charts: Custom SVG, CSS Grid for layouts
 - No emojis in UI
